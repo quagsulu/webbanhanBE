@@ -22,7 +22,6 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import cloudinary from '../middleware/multer.js'
 import multer from 'multer'
 const routerUser = Router()
-
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   folder: 'AVATAR',
@@ -36,7 +35,7 @@ const upload = multer({
 routerUser.post('/register', upload.single('avatar'), register)
 routerUser.post('/googleSign', registerGoogle)
 routerUser.post('/login', login)
-routerUser.get('/count', totalCountUser)
+// routerUser.get('/count', totalCountUser)
 routerUser.get('/', getAllUser)
 routerUser.get('/userDetail', verifyAccessToken, getDetailUser)
 routerUser.get('/:id', getDetailUserById)

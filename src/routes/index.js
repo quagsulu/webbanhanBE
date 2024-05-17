@@ -1,17 +1,7 @@
-import express from "express";
-import routerProducts from "./products";
-import routerCategory from "./category";
-import routerComment from "./comment";
-import routerUser from "./user";
-const router = express.Router();
+import { Router } from "express";
 
-router.use("/products", routerProducts);
-// router.use("/", routerProducts);
-routerInit.use('/category', routerCategory)
-routerInit.use('/comment', routerComment)
-routerInit.use('/user', routerUser)
+const router = Router()
 
+router.use('',router)
 
-
-// router.use("/users", routerUsers);
-export default router;
+export default router

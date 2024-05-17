@@ -1,45 +1,13 @@
-// import express from "express";
-// import {
-//   create,
-//   getAll,
-//   getDetail,
-//   remove,
-//   update,
-// } from "../controllers/products";
-// const routerProducts = express.Router();
-
-// routerProducts.get("/", getAll);
-// routerProducts.get("/:id", getDetail);
-// routerProducts.put("/:id", update);
-// routerProducts.post("/", create);
-// routerProducts.delete("/:id", remove);
-
-// export default routerProducts;
 
 import express from 'express'
-import {
-  create,
-  getAll,
-  getAllSoftDelete,
-  getDetail,
-  remove,
-  restore,
-  softDelete,
-  update,
-  getRelatedMoVie,
-  getAllMovieHomePage,
-  searchMovie,
-  getMovieStatus,
-  getAllMovieHasShow,
-  getCountMovie
-} from '../controllers/movie.js'
-
-import { isAdmin, verifyAccessToken } from '../middleware/verifyToken.js'
+// import { isAdmin, verifyAccessToken } from '../middleware/verifyToken.js'
 // import { upload } from '../middleware/multer.js'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 // import cloudinary from '../middleware/multer.js'
 import multer from 'multer'
 import cloudinary from '../middleware/multer.js'
+import { create, getAll, getAllProductHomePage, getAllSoftDelete, getDetail, remove, restore, searchProduct, softDelete, update } from '../controllers/products.js'
+import routerCategory from './category.js'
 // import cloudinary, { upload } from '../middleware/multer.js'
 
 const routerProducts = express.Router()
@@ -55,14 +23,10 @@ const upload = multer({
 })
 
 
-
+// routerCategory
 routerProducts.get('/', getAll)
-routerProducts.get('/count', getCountMovie)
-routerProducts.get('/showtime', getAllMovieHasShow)
-routerProducts.get('/sta', getMovieStatus)
-routerProducts.get('/home', getAllMovieHomePage)
-routerProducts.get('/search', searchMovie)
-routerProducts.get('/movieByCate/:id', getRelatedMoVie)
+routerProducts.get('/home', getAllProductHomePage)
+routerProducts.get('/search', searchProduct)
 routerProducts.get('/softdelete', getAllSoftDelete)
 routerProducts.get('/:id', getDetail)
 routerProducts.patch('/:id', upload.single('image'), update)
