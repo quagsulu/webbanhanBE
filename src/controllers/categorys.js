@@ -164,22 +164,9 @@ export const createcategories = async (req, res, next) => {
     if (error) {
       throw new ApiError(StatusCodes.BAD_REQUEST, new Error(error).message)
     }
-    const data = await Category.create({
-      ...body,
-      slug: slugify(body.name)
-    })
+    const data = await Category.create(body)
     if (!data) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Create category failed')
-    }
-    // Tạo ra mảng array của product
-    const arrayProduct = data.products
-    // Tạo vòng lặp để thêm product với category
-    for (let i = 0; i < arrayProduct.length; i++) {
-      await Product.findOneAndUpdate(arrayProduct[i], {
-        $addToSet: {
-          categoryId: data._id
-        }
-      })
     }
     return res.status(StatusCodes.CREATED).json({
       message: 'Success',

@@ -9,34 +9,74 @@ import productSchema from "../validate/product";
 dotenv.config();
 
 const { DB_URL } = process.env;
+// export const getAll = async (req, res, next) => {
+//   try {
+//     // const categoryId = req.params.id;
+//     const { id: categoryId } = req.params
+//     const {
+//       _page = 1,
+//       _limit = 50,
+//       _sort = 'createdAt',
+//       _order = 'asc'
+//     } = req.query
+//     const options = {
+//       page: _page,
+//       limit: _limit,
+//       sort: {
+//         [_sort]: _order === 'asc' ? 1 : -1
+//       }
+//     }
+//     const data = await Product.find({})
+//     if (!data || data.length === 0) {
+//       throw new ApiError(StatusCodes.NOT_FOUND, 'No Food found!')
+//     }
+//     return res.status(StatusCodes.OK).json({
+//       message: 'Success',
+//        data
+//     })
+//   } catch (error) {
+//     next(error)
+//   }
+// }
 export const getAll = async (req, res, next) => {
   try {
+    const { id: categoryId } = req.params;
     const {
       _page = 1,
       _limit = 50,
       _sort = 'createdAt',
       _order = 'asc'
-    } = reqBody.query
+    } = req.query;
+
+    // Tính toán số phần tử bị bỏ qua (skip) dựa trên trang hiện tại và số lượng phần tử trên mỗi trang
+    const skip = (_page - 1) * _limit;
+
+    // Tạo một object options để truy vấn MongoDB
     const options = {
-      page: _page,
-      limit: _limit,
+      skip: skip,
+      limit: parseInt(_limit), // Chuyển đổi _limit từ string sang number
       sort: {
         [_sort]: _order === 'asc' ? 1 : -1
-      },
-      populate: ['showTimes']
-    }
-    const data = await Product.paginate({ destroy: false }, options)
+      }
+    };
 
-    if (!data || data.docs.length === 0) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'No food found!')
+    // Truy vấn dữ liệu từ cơ sở dữ liệu sử dụng các options đã được tạo
+    const data = await Product.find({}, {}, options);
+
+    // Kiểm tra nếu không có dữ liệu được trả về
+    if (!data || data.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'No Food found!');
     }
-    return {
-      ...data
-    }
+
+    // Trả về dữ liệu và thông tin phân trang
+    return res.status(StatusCodes.OK).json({
+      message: 'Success',
+      data
+    });
   } catch (error) {
-    throw error
+    next(error);
   }
-}
+};
 export const getProductByCategory = async (reqBody) => {
   try {
     const id = reqBody.params.id
@@ -44,7 +84,7 @@ export const getProductByCategory = async (reqBody) => {
     // Lấy dữ liệu từ bảng categories khi query data từ bảng Product
     const data = await Product.findById(id)
 
-    if (!data || Object.keys(data).length === 0) {
+    if (!data || data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'No food id found!')
     }
     const categoriesId = data.categoryId
@@ -62,12 +102,8 @@ export const getProductByCategory = async (reqBody) => {
     }
     // console.log(relateProduct)
     const convertDateProduct = relateProduct.map((Product) => {
-      const fromDateConvert = convertTimeToCurrentZone(Product.fromDate)
-      const toDateConvert = convertTimeToCurrentZone(Product.toDate)
       return {
         ...Product._doc,
-        fromDate: fromDateConvert,
-        toDate: toDateConvert
       }
     })
     return convertDateProduct
@@ -82,7 +118,7 @@ export const getAllProductHomePage = async (req, res, next) => {
       _limit = 50,
       _sort = 'createdAt',
       _order = 'asc'
-    } = reqBody.query
+    } = req.query
     const options = {
       page: _page,
       limit: _limit,
@@ -114,7 +150,7 @@ export const searchProduct = async (req, res, next) => {
       _sort = 'createdAt',
       _order = 'asc',
       q = ''
-    } = reqBody.query
+    } = req.query
     const options = {
       page: _page,
       limit: _limit,
@@ -171,7 +207,7 @@ export const getAllSoftDelete = async (req, res, next) => {
 }
 export const getDetail = async (req, res, next) => {
   try {
-    const {id} = req.params.id
+    const {id} = req.params
     const data = await Product.findById(id)
 
     if (!data || data.length === 0) {
@@ -186,57 +222,76 @@ export const getDetail = async (req, res, next) => {
     next(error)
   }
 }
+// export const create = async (req, res, next) => {
+//   try {
+//     const body = req.body
+//     //thêm đường dẫn ảnh vòa body
+//     let imageUrl
+//     let cloudGetUrl
+//     const { error } = productSchema.validate(body, { abortEarly: true })
+//     if (error) {
+//       throw new ApiError(StatusCodes.BAD_REQUEST, new Error(error).message)
+//     }
+//     if (req.file) {
+//       cloudGetUrl = await cloudinary.uploader.upload(req.file.path, {
+//         folder: 'AVATAR',
+//         allowed_formats: ['jpg', 'png', 'jpeg'],
+//         transformation: [{ width: 500, height: 500, crop: 'limit' }]
+//       })
+//       imageUrl = cloudGetUrl.secure_url
+//     } else {
+//       imageUrl =
+//         'https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-19.jpg'
+//     }
+
+//     // const { prices, ...restBody } = body
+//     const data = await Product.create({
+//     ...body,
+//       ...(cloudGetUrl && { image: imageUrl }),
+//     })
+
+//     if (!data) {
+//       throw new ApiError(StatusCodes.NOT_FOUND, 'Create movie failed!')
+//     }
+//     // // Tạo ra mảng array của category
+//     // const arrayCategory = data.categoryId
+//     // // Tạo vòng lặp để thêm từng cái product id vào mỗi mảng product của category
+//     // for (let i = 0; i < arrayCategory.length; i++) {
+//     //   await Category.findOneAndUpdate(arrayCategory[i], {
+//     //     $addToSet: {
+//     //       products: data._id
+//     //     }
+//     //   })
+//     // }
+  
+
+//     return data
+//   } catch (error) {
+//     throw error
+//   }
+// }
 export const create = async (req, res, next) => {
   try {
     const body = req.body
-    //thêm đường dẫn ảnh vòa body
-    let imageUrl
-    let cloudGetUrl
     const { error } = productSchema.validate(body, { abortEarly: true })
     if (error) {
       throw new ApiError(StatusCodes.BAD_REQUEST, new Error(error).message)
     }
-    if (req.file) {
-      cloudGetUrl = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'AVATAR',
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-        transformation: [{ width: 500, height: 500, crop: 'limit' }]
-      })
-      imageUrl = cloudGetUrl.secure_url
-    } else {
-      imageUrl =
-        'https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-19.jpg'
-    }
-
-    // const { prices, ...restBody } = body
-    const data = await Movie.create({
-      ...restBody,
-      ...(cloudGetUrl && { image: imageUrl }),
-    })
-
+    const data = await Product.create(body)
     if (!data) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Create movie failed!')
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Create Food failed')
     }
-    // Tạo ra mảng array của category
-    const arrayCategory = data.categoryId
-    // Tạo vòng lặp để thêm từng cái product id vào mỗi mảng product của category
-    for (let i = 0; i < arrayCategory.length; i++) {
-      await Category.findOneAndUpdate(arrayCategory[i], {
-        $addToSet: {
-          products: data._id
-        }
-      })
-    }
-  
-
-    return data
+    return res.status(StatusCodes.CREATED).json({
+      message: 'Success',
+      data: data
+    })
   } catch (error) {
-    throw error
+    next(error)
   }
 }
 export const update = async (req, res, next) => {
   try {
-    const id = req.params.id
+    const {id} = req.params
     const body = req.body
     let imageUrl
     let cloudGetUrl
@@ -244,9 +299,9 @@ export const update = async (req, res, next) => {
     if (error) {
       throw new ApiError(StatusCodes.BAD_REQUEST, new Error(error).message)
     }
-    const checkmovie = await Movie.findById(id)
-    if (!checkmovie || checkmovie.length === 0) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Phim không tồn tại')
+    const checkProduct = await Product.findById(id)
+    if (!checkProduct || checkProduct.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Đồ ăn không tồn tại')
     }
     if (req.file) {
       cloudGetUrl = await cloudinary.uploader.upload(req.file.path, {
@@ -258,79 +313,23 @@ export const update = async (req, res, next) => {
     } else {
       imageUrl = body.image
     }
-    // check destroy nếu đang xóa mềm thì không thể sửa được bất cứ trường nào
-    if (checkmovie.destroy) {
-      throw new ApiError(
-        StatusCodes.NOT_FOUND,
-        'Bộ phim này đã bị xóa mềm không thể sửa!'
-      )
-    }
-
-    // const data = await Movie.findByIdAndUpdate(id, body, { new: true })
-    const data = await Movie.findById(id, 'categoryId prices')
-
-    const {...reqbody } = body
-
-    const updateData = await Movie.updateOne(
+    // const data = await Product.findOneAndUpdate({_id:id} , body)
+    const updateData = await Product.updateOne(
       { _id: id },
       {
-        ...reqbody,
-        ...(cloudGetUrl && { image: imageUrl }),
+        ...body
+        // ...(cloudGetUrl && { image: imageUrl }),
       }
     )
 
     if (!updateData) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Update movie failed!')
     }
-
-    if (body?.categoryId && body.categoryId.length > 0) {
-      const result = findDifferentElements(data.categoryId, body.categoryId)
-      // Những id category mới thêm mảng categoryId của movie
-      const newCategory = result.filter((cate) => {
-        if (body.categoryId.includes(cate)) {
-          return cate
-        }
-      })
-      // Những id category bị xóa khỏi mảng categoryId của movie
-      const deletedCategoryfromProduct = findDifferentElements(
-        newCategory,
-        result
-      )
-      if (newCategory && newCategory.length > 0) {
-        await Category.updateMany(
-          {
-            _id: {
-              // tìm ra tất cả những id trong mảng dùng $in
-              $in: newCategory
-            }
-          },
-          {
-            // Thêm productId vào products trong category nếu có rồi thì ko thêm , chưa có thì mới thêm dùng $addToSet
-            $addToSet: {
-              products: id
-            }
-          }
-        )
-      }
-      if (deletedCategoryfromProduct && deletedCategoryfromProduct.length > 0) {
-        await Category.updateMany(
-          {
-            _id: {
-              // tìm ra tất cả những id trong mảng dùng $in
-              $in: deletedCategoryfromProduct
-            }
-          },
-          {
-            // Xóa productId khỏi products trong category thì dùng $pull
-            $pull: {
-              products: id
-            }
-          }
-        )
-      }
-    }
-
-    return updateData
+    return res.status(StatusCodes.OK).json({
+      message: 'Success',
+      data: updateData
+    })
+    // return updateData
   } catch (error) {
     throw error
   }
@@ -338,10 +337,9 @@ export const update = async (req, res, next) => {
 
 export const softDelete = async (req, res, next) => {
   try {
-    const id = req.params.id
+    const {id} = req.params
     const data = await Product.updateOne(
-      { _id: id },
-      { destroy: true, status: CANCELLED }
+      { _id: id }
     )
     if (!data) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Soft delete Product failed!')
@@ -355,12 +353,7 @@ export const restore = async (req, res, next) => {
   try {
     const id = req.params.id
     // check suat chieu
-    const checkshowtimes = await Showtimes.find({ ProductId: id })
-    const showtime = await checkshowtimes[0]
-    if (showtime != undefined) {
-      throw new ApiError(StatusCodes.NOT_FOUND, '')
-    }
-    const data = await Product.updateOne({ _id: id }, { destroy: false, status: COMING_SOON })
+    const data = await Product.updateOne({ _id: id })
     if (!data) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Product restore failed !')
     }

@@ -6,19 +6,6 @@ const categorySchema = mongoose.Schema(
       type: String,
       required: true
     }
-    // ,
-    // isDeleteable: {
-    //   type: Boolean,
-    //   required: true,
-    //   default : true
-    // },
-    // products: [{
-    //   type: mongoose.Types.ObjectId,
-    //   ref: 'Movie'
-    // }],
-    // slug : {
-    //   type : String
-    // }
   },
   { versionKey: false, timestamps: true }
 );

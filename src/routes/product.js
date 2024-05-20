@@ -1,20 +1,5 @@
 import express from 'express'
-// import {
-//   create,
-//   getAll,
-//   getAllSoftDelete,
-//   getDetail,
-//   remove,
-//   restore,
-//   softDelete,
-//   update,
-//   getRelatedMoVie,
-//   getAllMovieHomePage,
-//   searchMovie,
-//   getMovieStatus,
-//   getAllMovieHasShow,
-//   getCountMovie
-// } from '../controllers/movie.js'
+
 
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import multer from 'multer'
@@ -39,6 +24,7 @@ routerProducts.get('/search', searchProduct)
 routerProducts.get('/softdelete', getAllSoftDelete)
 routerProducts.get('/:id', getDetail)
 routerProducts.patch('/:id', upload.single('image'), update)
+// routerProducts.patch('/:id',  update)
 routerProducts.post('/', upload.single('image'), create)
 routerProducts.delete('/:id', remove)
 routerProducts.patch('/softdelete/:id', softDelete)
