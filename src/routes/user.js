@@ -35,8 +35,8 @@ routerUser.patch(
   verifyAccessToken,
   updateClient
 )
-routerUser.post('/forgotPassword', forgotPassword)
-routerUser.put('/resetPassword', resetPassword)
+// routerUser.post('/forgotPassword', forgotPassword)
+// routerUser.put('/resetPassword', resetPassword)
 
 routerUser.patch('/block/:id',verifyAccessToken, isAdmin,  blocked)
 routerUser.patch('/unBlock/:id', unBlock)

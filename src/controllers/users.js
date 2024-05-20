@@ -26,7 +26,6 @@ export const register = asyncHandler(async (req, res, next) => {
     if (user) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Email đã được đăng ký!')
     }
-
     const hashPassword = await bcrypt.hash(body.password, 10)
     // const hashConfirmPassword = await bcrypt.hash(body.confirmPassword, 10)
 
@@ -48,19 +47,9 @@ export const register = asyncHandler(async (req, res, next) => {
       // confirmPassword: hashConfirmPassword,
       avatar: avatarUrl
     })
-
-    // const newUser = await response.populate('roleIds', 'roleName')
-
-    // thêm user vào bảng role user
-    // await RoleUser.findOneAndUpdate(
-    //   { roleName: 'user' },
-    //   { $push: { userIds: newUser._id } },
-    //   { new: true }
-    // )
-
     return res.status(200).json({
-      message: newUser ? 'Đăng kí thành công' : 'Đăng kí thất bại',
-      newUser
+      message: response ? 'Đăng kí thành công' : 'Đăng kí thất bại',
+      response
     })
   } catch (error) {
     next(error)
@@ -95,7 +84,7 @@ export const login = asyncHandler(async (req, res) => {
 })
 
 export const getAllUser = asyncHandler(async (req, res) => {
-  const response = await User.find({}).populate('roleIds', 'roleName')
+  const response = await User.find({})
   if (!response || response.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No users found!')
   }
